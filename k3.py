@@ -1,11 +1,26 @@
 # =========================================================
-# STUDENT GRADE MANAGEMENT SYSTEM WITH SIMPLE GUI
-# Python Tkinter Project
+#                 GRADEBOOK APPLICATION
+#         Student Grade Management System
+# =========================================================
+
+# Features:
+# ✔ Add Student
+# ✔ Add Marks
+# ✔ Calculate GPA (Out of 10)
+# ✔ Search Student
+# ✔ Delete Student
+# ✔ Export Report Card
+# ✔ Beautiful GUI
+# ✔ Table Display
+# ✔ Performance Tracking
+
+# =========================================================
+# IMPORT LIBRARIES
 # =========================================================
 
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import ttk
+from tkinter import ttk, messagebox
+import datetime
 
 # =========================================================
 # MAIN WINDOW
@@ -13,11 +28,13 @@ from tkinter import ttk
 
 root = tk.Tk()
 
-root.title("Student Grade Management System")
+root.title("GradeBook - Student Grade Management System")
 
-root.geometry("900x600")
+root.geometry("1000x650")
 
-root.config(bg="#f0f4f7")
+root.config(bg="#f4f6f9")
+
+root.resizable(False, False)
 
 # =========================================================
 # DATA STORAGE
@@ -29,23 +46,51 @@ students = {}
 # FUNCTIONS
 # =========================================================
 
+# ---------------------------------------------------------
+# CLEAR INPUT FIELDS
+# ---------------------------------------------------------
+
+def clear_fields():
+
+    name_entry.delete(0, tk.END)
+
+    roll_entry.delete(0, tk.END)
+
+    class_entry.delete(0, tk.END)
+
+    subject_entry.delete(0, tk.END)
+
+    marks_entry.delete(0, tk.END)
+
+
+# ---------------------------------------------------------
+# GRADE CALCULATION
+# ---------------------------------------------------------
+
 def get_grade(score):
 
     if score >= 90:
+        return "A+"
+
+    elif score >= 80:
         return "A"
 
-    elif score >= 75:
+    elif score >= 70:
         return "B"
 
     elif score >= 60:
         return "C"
 
-    elif score >= 40:
+    elif score >= 50:
         return "D"
 
     else:
         return "F"
 
+
+# ---------------------------------------------------------
+# GPA CALCULATION (OUT OF 10)
+# ---------------------------------------------------------
 
 def calculate_gpa(avg):
 
@@ -71,37 +116,53 @@ def calculate_gpa(avg):
         return 4.0
 
 
-# =========================================================
+# ---------------------------------------------------------
 # ADD STUDENT
-# =========================================================
+# ---------------------------------------------------------
 
 def add_student():
 
-    name = name_entry.get()
+    name = name_entry.get().strip()
 
-    roll = roll_entry.get()
+    roll = roll_entry.get().strip()
 
-    class_name = class_entry.get()
+    class_name = class_entry.get().strip()
 
-    subject = subject_entry.get()
+    subject = subject_entry.get().strip()
 
-    marks = marks_entry.get()
+    marks = marks_entry.get().strip()
 
     # Validation
 
     if name == "" or roll == "" or class_name == "":
-        messagebox.showerror("Error", "Please fill all fields")
+        messagebox.showerror(
+            "Error",
+            "Please fill all required fields"
+        )
+        return
+
+    if subject == "":
+        messagebox.showerror(
+            "Error",
+            "Please enter subject"
+        )
         return
 
     try:
         marks = float(marks)
 
     except:
-        messagebox.showerror("Error", "Marks must be number")
+        messagebox.showerror(
+            "Error",
+            "Marks must be number"
+        )
         return
 
     if marks < 0 or marks > 100:
-        messagebox.showerror("Error", "Marks must be between 0-100")
+        messagebox.showerror(
+            "Error",
+            "Marks must be between 0 and 100"
+        )
         return
 
     # Add Student
@@ -109,23 +170,30 @@ def add_student():
     if name not in students:
 
         students[name] = {
+
             "roll": roll,
+
             "class": class_name,
+
             "subjects": {}
+
         }
 
     students[name]["subjects"][subject] = marks
 
-    messagebox.showinfo("Success", "Student Added Successfully")
+    messagebox.showinfo(
+        "Success",
+        "Student Added Successfully"
+    )
 
     clear_fields()
 
     show_students()
 
 
-# =========================================================
-# SHOW STUDENTS
-# =========================================================
+# ---------------------------------------------------------
+# SHOW STUDENTS IN TABLE
+# ---------------------------------------------------------
 
 def show_students():
 
@@ -143,31 +211,45 @@ def show_students():
 
         gpa = calculate_gpa(average)
 
-        table.insert("", tk.END, values=(
+        table.insert(
 
-            name,
-            data["roll"],
-            data["class"],
-            round(average, 2),
-            grade,
-            gpa
+            "",
 
-        ))
+            tk.END,
+
+            values=(
+
+                name,
+
+                data["roll"],
+
+                data["class"],
+
+                len(subjects),
+
+                round(average, 2),
+
+                grade,
+
+                gpa
+
+            )
+        )
 
 
-# =========================================================
+# ---------------------------------------------------------
 # SEARCH STUDENT
-# =========================================================
+# ---------------------------------------------------------
 
 def search_student():
 
-    search_name = search_entry.get()
+    search_name = search_entry.get().lower()
 
     table.delete(*table.get_children())
 
     for name, data in students.items():
 
-        if search_name.lower() in name.lower():
+        if search_name in name.lower():
 
             subjects = data["subjects"]
 
@@ -179,51 +261,85 @@ def search_student():
 
             gpa = calculate_gpa(average)
 
-            table.insert("", tk.END, values=(
+            table.insert(
 
-                name,
-                data["roll"],
-                data["class"],
-                round(average, 2),
-                grade,
-                gpa
+                "",
 
-            ))
+                tk.END,
+
+                values=(
+
+                    name,
+
+                    data["roll"],
+
+                    data["class"],
+
+                    len(subjects),
+
+                    round(average, 2),
+
+                    grade,
+
+                    gpa
+
+                )
+            )
 
 
-# =========================================================
+# ---------------------------------------------------------
 # DELETE STUDENT
-# =========================================================
+# ---------------------------------------------------------
 
 def delete_student():
 
     selected = table.selection()
 
     if not selected:
-        messagebox.showerror("Error", "Select Student")
+
+        messagebox.showerror(
+            "Error",
+            "Please select student"
+        )
+
         return
 
     item = table.item(selected)
 
-    name = item["values"][0]
+    student_name = item["values"][0]
 
-    del students[name]
+    confirm = messagebox.askyesno(
+        "Confirm",
+        f"Delete {student_name}?"
+    )
 
-    messagebox.showinfo("Deleted", "Student Deleted")
+    if confirm:
 
-    show_students()
+        del students[student_name]
+
+        show_students()
+
+        messagebox.showinfo(
+            "Deleted",
+            "Student Deleted Successfully"
+        )
 
 
-# =========================================================
-# EXPORT REPORT
-# =========================================================
+# ---------------------------------------------------------
+# EXPORT REPORT CARD
+# ---------------------------------------------------------
 
 def export_report():
 
     selected = table.selection()
 
     if not selected:
-        messagebox.showerror("Error", "Select Student")
+
+        messagebox.showerror(
+            "Error",
+            "Please select student"
+        )
+
         return
 
     item = table.item(selected)
@@ -242,223 +358,352 @@ def export_report():
 
     gpa = calculate_gpa(average)
 
-    filename = name.replace(" ", "_") + "_report.txt"
+    filename = name.replace(" ", "_") + "_Report.txt"
 
     file = open(filename, "w")
 
-    file.write("====================================\n")
-    file.write("     STUDENT REPORT CARD\n")
-    file.write("====================================\n\n")
+    file.write("=" * 50 + "\n")
 
-    file.write(f"Name : {name}\n")
-    file.write(f"Roll : {data['roll']}\n")
-    file.write(f"Class : {data['class']}\n\n")
+    file.write("          GRADEBOOK REPORT CARD\n")
 
-    file.write("------------------------------------\n")
+    file.write("=" * 50 + "\n\n")
+
+    file.write(f"Student Name : {name}\n")
+
+    file.write(f"Roll Number  : {data['roll']}\n")
+
+    file.write(f"Class        : {data['class']}\n")
+
+    file.write(f"Date         : {datetime.date.today()}\n")
+
+    file.write("\n")
+
+    file.write("-" * 50 + "\n")
+
+    file.write("{:<20} {:<10}\n".format(
+        "Subject",
+        "Marks"
+    ))
+
+    file.write("-" * 50 + "\n")
 
     for subject, marks in subjects.items():
 
-        file.write(f"{subject} : {marks}\n")
+        file.write("{:<20} {:<10}\n".format(
+            subject,
+            marks
+        ))
 
-    file.write("------------------------------------\n\n")
+    file.write("-" * 50 + "\n")
 
     file.write(f"Average : {round(average,2)}\n")
 
-    file.write(f"Grade : {grade}\n")
+    file.write(f"Grade   : {grade}\n")
 
-    file.write(f"GPA : {gpa}\n")
+    file.write(f"GPA     : {gpa}/10\n")
+
+    file.write("\n")
+
+    if gpa >= 9:
+        file.write("Performance : Excellent\n")
+
+    elif gpa >= 7:
+        file.write("Performance : Very Good\n")
+
+    elif gpa >= 6:
+        file.write("Performance : Good\n")
+
+    else:
+        file.write("Performance : Needs Improvement\n")
+
+    file.write("\n")
+
+    file.write("=" * 50)
 
     file.close()
 
-    messagebox.showinfo("Success", f"Report Saved As {filename}")
+    messagebox.showinfo(
+        "Success",
+        f"Report Exported as {filename}"
+    )
 
 
 # =========================================================
-# CLEAR FIELDS
-# =========================================================
-
-def clear_fields():
-
-    name_entry.delete(0, tk.END)
-
-    roll_entry.delete(0, tk.END)
-
-    class_entry.delete(0, tk.END)
-
-    subject_entry.delete(0, tk.END)
-
-    marks_entry.delete(0, tk.END)
-
-
-# =========================================================
-# TITLE
+# TITLE SECTION
 # =========================================================
 
 title = tk.Label(
 
     root,
-    text="Student Grade Management System",
-    font=("Arial", 22, "bold"),
-    bg="#f0f4f7",
-    fg="#1f2937"
+
+    text="GradeBook",
+
+    font=("Arial", 28, "bold"),
+
+    bg="#f4f6f9",
+
+    fg="#2563eb"
 
 )
 
-title.pack(pady=15)
+title.pack(pady=10)
+
+subtitle = tk.Label(
+
+    root,
+
+    text="Student Grade Management System",
+
+    font=("Arial", 12),
+
+    bg="#f4f6f9",
+
+    fg="gray"
+
+)
+
+subtitle.pack()
 
 # =========================================================
 # FORM FRAME
 # =========================================================
 
-form_frame = tk.Frame(root, bg="white", bd=2, relief=tk.RIDGE)
+form_frame = tk.Frame(
 
-form_frame.pack(pady=10, padx=20, fill="x")
+    root,
+
+    bg="white",
+
+    bd=2,
+
+    relief=tk.RIDGE
+
+)
+
+form_frame.pack(
+
+    pady=15,
+
+    padx=20,
+
+    fill="x"
+
+)
 
 # =========================================================
 # NAME
 # =========================================================
 
-name_label = tk.Label(
+tk.Label(
 
     form_frame,
+
     text="Student Name",
-    font=("Arial", 12),
+
+    font=("Arial", 11),
+
     bg="white"
 
-)
+).grid(row=0, column=0, padx=10, pady=10)
 
-name_label.grid(row=0, column=0, padx=10, pady=10)
-
-name_entry = tk.Entry(form_frame, font=("Arial", 12), width=25)
-
-name_entry.grid(row=0, column=1, padx=10, pady=10)
-
-# =========================================================
-# ROLL
-# =========================================================
-
-roll_label = tk.Label(
+name_entry = tk.Entry(
 
     form_frame,
-    text="Roll Number",
-    font=("Arial", 12),
-    bg="white"
+
+    font=("Arial", 11),
+
+    width=25
 
 )
 
-roll_label.grid(row=0, column=2, padx=10, pady=10)
+name_entry.grid(row=0, column=1)
 
-roll_entry = tk.Entry(form_frame, font=("Arial", 12), width=25)
+# =========================================================
+# ROLL NUMBER
+# =========================================================
 
-roll_entry.grid(row=0, column=3, padx=10, pady=10)
+tk.Label(
+
+    form_frame,
+
+    text="Roll Number",
+
+    font=("Arial", 11),
+
+    bg="white"
+
+).grid(row=0, column=2, padx=10)
+
+roll_entry = tk.Entry(
+
+    form_frame,
+
+    font=("Arial", 11),
+
+    width=25
+
+)
+
+roll_entry.grid(row=0, column=3)
 
 # =========================================================
 # CLASS
 # =========================================================
 
-class_label = tk.Label(
+tk.Label(
 
     form_frame,
+
     text="Class",
-    font=("Arial", 12),
+
+    font=("Arial", 11),
+
     bg="white"
+
+).grid(row=1, column=0, padx=10, pady=10)
+
+class_entry = tk.Entry(
+
+    form_frame,
+
+    font=("Arial", 11),
+
+    width=25
 
 )
 
-class_label.grid(row=1, column=0, padx=10, pady=10)
-
-class_entry = tk.Entry(form_frame, font=("Arial", 12), width=25)
-
-class_entry.grid(row=1, column=1, padx=10, pady=10)
+class_entry.grid(row=1, column=1)
 
 # =========================================================
 # SUBJECT
 # =========================================================
 
-subject_label = tk.Label(
+tk.Label(
 
     form_frame,
+
     text="Subject",
-    font=("Arial", 12),
+
+    font=("Arial", 11),
+
     bg="white"
+
+).grid(row=1, column=2)
+
+subject_entry = tk.Entry(
+
+    form_frame,
+
+    font=("Arial", 11),
+
+    width=25
 
 )
 
-subject_label.grid(row=1, column=2, padx=10, pady=10)
-
-subject_entry = tk.Entry(form_frame, font=("Arial", 12), width=25)
-
-subject_entry.grid(row=1, column=3, padx=10, pady=10)
+subject_entry.grid(row=1, column=3)
 
 # =========================================================
 # MARKS
 # =========================================================
 
-marks_label = tk.Label(
+tk.Label(
 
     form_frame,
+
     text="Marks",
-    font=("Arial", 12),
+
+    font=("Arial", 11),
+
     bg="white"
+
+).grid(row=2, column=0, padx=10, pady=10)
+
+marks_entry = tk.Entry(
+
+    form_frame,
+
+    font=("Arial", 11),
+
+    width=25
 
 )
 
-marks_label.grid(row=2, column=0, padx=10, pady=10)
-
-marks_entry = tk.Entry(form_frame, font=("Arial", 12), width=25)
-
-marks_entry.grid(row=2, column=1, padx=10, pady=10)
+marks_entry.grid(row=2, column=1)
 
 # =========================================================
-# BUTTONS
+# BUTTON FRAME
 # =========================================================
 
-button_frame = tk.Frame(root, bg="#f0f4f7")
+button_frame = tk.Frame(
+
+    root,
+
+    bg="#f4f6f9"
+
+)
 
 button_frame.pack(pady=10)
 
-# Add Button
+# ADD BUTTON
 
 add_btn = tk.Button(
 
     button_frame,
+
     text="Add Student",
-    font=("Arial", 12, "bold"),
+
+    font=("Arial", 11, "bold"),
+
     bg="#2563eb",
+
     fg="white",
+
     width=15,
+
     command=add_student
 
 )
 
 add_btn.grid(row=0, column=0, padx=10)
 
-# Delete Button
+# DELETE BUTTON
 
 delete_btn = tk.Button(
 
     button_frame,
+
     text="Delete Student",
-    font=("Arial", 12, "bold"),
+
+    font=("Arial", 11, "bold"),
+
     bg="#dc2626",
+
     fg="white",
+
     width=15,
+
     command=delete_student
 
 )
 
 delete_btn.grid(row=0, column=1, padx=10)
 
-# Export Button
+# EXPORT BUTTON
 
 export_btn = tk.Button(
 
     button_frame,
+
     text="Export Report",
-    font=("Arial", 12, "bold"),
+
+    font=("Arial", 11, "bold"),
+
     bg="#059669",
+
     fg="white",
+
     width=15,
+
     command=export_report
 
 )
@@ -466,43 +711,51 @@ export_btn = tk.Button(
 export_btn.grid(row=0, column=2, padx=10)
 
 # =========================================================
-# SEARCH
+# SEARCH BAR
 # =========================================================
 
-search_frame = tk.Frame(root, bg="#f0f4f7")
+search_frame = tk.Frame(
 
-search_frame.pack(pady=10)
+    root,
 
-search_label = tk.Label(
-
-    search_frame,
-    text="Search Student",
-    font=("Arial", 12),
-    bg="#f0f4f7"
+    bg="#f4f6f9"
 
 )
 
-search_label.grid(row=0, column=0, padx=5)
+search_frame.pack(pady=10)
 
-search_entry = tk.Entry(search_frame, font=("Arial", 12), width=30)
+search_entry = tk.Entry(
 
-search_entry.grid(row=0, column=1, padx=5)
+    search_frame,
+
+    font=("Arial", 11),
+
+    width=35
+
+)
+
+search_entry.grid(row=0, column=0, padx=10)
 
 search_btn = tk.Button(
 
     search_frame,
-    text="Search",
-    font=("Arial", 11, "bold"),
+
+    text="Search Student",
+
+    font=("Arial", 10, "bold"),
+
     bg="#7c3aed",
+
     fg="white",
+
     command=search_student
 
 )
 
-search_btn.grid(row=0, column=2, padx=5)
+search_btn.grid(row=0, column=1)
 
 # =========================================================
-# TABLE
+# TABLE FRAME
 # =========================================================
 
 table_frame = tk.Frame(root)
@@ -512,10 +765,17 @@ table_frame.pack(pady=20)
 columns = (
 
     "Name",
-    "Roll",
+
+    "Roll No",
+
     "Class",
+
+    "Subjects",
+
     "Average",
+
     "Grade",
+
     "GPA"
 
 )
@@ -523,13 +783,16 @@ columns = (
 table = ttk.Treeview(
 
     table_frame,
+
     columns=columns,
+
     show="headings",
-    height=12
+
+    height=14
 
 )
 
-# Headings
+# TABLE HEADINGS
 
 for col in columns:
 
@@ -546,9 +809,13 @@ table.pack()
 footer = tk.Label(
 
     root,
-    text="Simple Python Tkinter Project",
+
+    text="GradeBook • Developed Using Python Tkinter",
+
     font=("Arial", 10),
-    bg="#f0f4f7",
+
+    bg="#f4f6f9",
+
     fg="gray"
 
 )
@@ -556,7 +823,7 @@ footer = tk.Label(
 footer.pack(pady=10)
 
 # =========================================================
-# RUN PROGRAM
+# RUN APPLICATION
 # =========================================================
 
 root.mainloop()
