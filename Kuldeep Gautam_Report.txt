@@ -1,0 +1,20 @@
+=================================
+       GRADEBOOK REPORT
+=================================
+
+Student Name : Kuldeep Gautam
+Roll Number  : 1530
+Class        : 10
+
+---------------------------------
+Subjects & Marks
+---------------------------------
+phyics : 89.0
+math : 93.0
+
+Average : 91.0
+Grade   : A+
+GPA     : 10/10
+Performance : Excellent
+
+Generated On : 2026-05-11
